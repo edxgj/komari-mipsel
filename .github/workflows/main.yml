@@ -10,6 +10,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'komari-monitor/komari-agent'
+        fetch-depth: 0
         
     - name: Setup Go
       uses: actions/setup-go@v5
@@ -18,7 +19,9 @@ jobs:
         
     - name: Compile for MIPSLE (mipsel_24kc)
       run: |
-        CGO_ENABLED=0 GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -trimpath -ldflags="-s -w" -o komari-agent-mipsle
+        VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "custom-build")
+        echo "Building version: $VERSION"
+        CGO_ENABLED=0 GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -trimpath -ldflags="-s -w -X 'main.version=${VERSION}'" -o komari-agent-mipsle
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
